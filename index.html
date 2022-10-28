@@ -1,0 +1,421 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+		<title>Roll Roll Roll Your Dice Lucy Chen</title>
+		<style>
+      body {
+        background-image: url("https://w0.peakpx.com/wallpaper/870/749/HD-wallpaper-math-blackboard-texture-background-with-geometric-shapes-math-background-math-texture-geometric-lines-shapes-texture-mathematics-background.jpg");
+        background-image: url("https://p4.wallpaperbetter.com/wallpaper/782/869/293/abstraction-texture-colorful-abstract-wallpaper-preview.jpg");
+        
+        https://i.pinimg.com/736x/4d/c2/7b/4dc27b4dad3cdbfa38e3e698ee962796.jpg
+        max-width: 100%;
+        max-height: 100%;
+      }
+      table {
+        border: thick solid grey;
+        border-collapse: collapse;
+        width: 25%;
+        margin: auto;
+      }
+      th, td {
+        border: thin solid black;
+        padding: 8px;
+        width: 50%;
+        background-color: gray;
+        color: white;
+      }
+      h1, h2 {
+        text-align: center;
+        color: white;
+        width: 50%;
+        margin: auto;
+        background-color: #976dc7;
+      }
+      label, p {
+        font-size: 1.2rem;
+      }
+      p {
+        text-align: center;
+      }
+      input[type = number] {
+        width: 100%;
+        padding: 12px 20px;
+        margin: 8px 0;
+        box-sizing: border-box;
+        background-color: white;
+      }
+      select {
+        width: 100%;
+        padding: 16px 20px;
+        border: none;
+        border-radius: 4px;
+        background-color: white;
+      }
+      input[type=submit], button {
+        width: 100%;
+        background-color: #5A9CE1;
+        color: white;
+        padding: 14px 20px;
+        margin: 8px 0;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+      }
+      input[type=submit]:hover {
+        background-color: #7AB3EE;
+      }
+      div {
+        border-radius: 5px;
+        background-color: #f2f2f2;
+        padding: 20px;
+        width: 50%;
+        margin: auto;
+      }
+      
+    </style>
+		<script>
+      function initialize() {
+        /*  initialize the global variables  */
+        //number of dice to be rolled
+        numDice = 0;
+        //number of rolls
+        numRolls = 0;
+        
+        //every roll result of each dice
+        rollResultsDice1 = []; 
+        rollResultsDice2 = [];
+        rollResultsDice3 = [];
+
+        //merges the results of all the arrays, used for calculating the statsitics
+        mergedArray = [];
+  
+        //sum of the rolls
+        rollSum = [];
+  
+        //frequency of each possible sum of the rolls. Each index represents a roll sum
+        rollSumFrequency = [];
+  
+        //statistics of all the rolls
+        stats = [];
+
+        inputContainer = document.getElementById("inputform");
+        numDiceLabel = document.getElementById("numDice");
+        numRollsLabel = document.getElementById("numRolls");
+        rollResultsTable = document.getElementById("rollResultsTable");
+        sumFrequencyTable = document.getElementById("sumFrequencyTable");
+        statsTable = document.getElementById("statsTable");
+
+        numDiceLabel.innerHTML = "# of dice to roll: 0";
+        numRollsLabel.innerHTMl = "# of dice rolls: 0";
+      }
+      function recordData() {
+        numDice = inputContainer.numDice.value;
+        numRolls = inputContainer.numRolls.value;
+
+        display();
+      }
+      function display() {
+        numDiceLabel.innerHTML = "# of dice to roll: " + numDice;
+        numRollsLabel.innerHTML = "# of dice rolls: " + numRolls;
+      }
+      function reset() {
+        rollResultsDice1 = []; 
+        rollResultsDice2 = [];
+        rollResultsDice3 = [];
+        mergedArray = [];
+        rollSum = [];
+        rollSumFrequency = [];
+        stats = [];
+        //reset table
+        let dice2 = document.getElementById("Dice #2");
+        removeCol(dice2);
+        let dice3 = document.getElementById("Dice #3");
+        removeCol(dice3);
+        let double = document.getElementById("# Doubles Rolled");
+        removeCol(double);
+        let triple = document.getElementById("# Triples Rolled");
+        removeCol(triple);
+        removeAllRows(rollResultsTable);
+        removeAllRows(sumFrequencyTable);
+        removeAllRows(statsTable);
+      }
+      function removeCol(element) {
+        if (element != null) {
+          element.remove();
+        }
+      }
+      function removeAllRows(table) {
+        let rowCount = table.rows.length;
+        for (let i = rowCount - 1; i > 0; i--) {
+           table.deleteRow(i);
+        }
+      }
+      function rollDice() {
+        reset();
+        //simulate the rolls
+        for (let i = 1; i <= numDice; i++) {
+          //first Dice
+          if (i == 1) {
+            rollResultsDice1 = generateOneRoll();
+          } else if (i == 2) { //second Dice
+            rollResultsDice2 = generateOneRoll();
+          } else if (i == 3) { //third Dice
+            rollResultsDice3 = generateOneRoll();
+          }
+        }
+        updateRollSumArr();
+        updateRollSumFrequencyArr();
+        updateStatsArr();
+        //Test
+        console.log(rollResultsDice1);
+        console.log(rollResultsDice2);
+        console.log(rollResultsDice3);
+        console.log(mergedArray);
+        console.log(rollSum);
+        console.log(rollSumFrequency);
+        console.log(stats);
+        
+        displayTables();
+      }
+      function displayTables() {
+        //display the results of each roll from arrays: rollResultsDice1, rollResultsDice2, and rollResultsDice3
+        if (numDice >= 2) {
+          appendColumn(rollResultsTable, document.getElementById("rollResultsRow"), "Dice #2");
+          //add column to the stats table based on numDice
+          appendColumn(statsTable, document.getElementById("statsRow"), "# Doubles Rolled")
+        }
+        if (numDice == 3) {
+          appendColumn(rollResultsTable, document.getElementById("rollResultsRow"), "Dice #3");
+          appendColumn(statsTable, document.getElementById("statsRow"), "# Triples Rolled")
+        }
+        for (let i = 0; i < numRolls; i++) {
+          let newRow = rollResultsTable.insertRow();
+          let newCell = newRow.insertCell();
+          newCell.innerHTML = i + 1;
+          newCell = newRow.insertCell();
+          newCell.innerHTML = rollResultsDice1[i];
+          if (numDice >= 2) {
+            newCell = newRow.insertCell();
+            newCell.innerHTML = rollResultsDice2[i];
+          }
+          if (numDice == 3) {
+            newCell = newRow.insertCell();
+            newCell.innerHTML = rollResultsDice3[i];
+          }
+        }
+        //display all possible results of sum and its corresponding frequency from array: rollSumFrequency
+        for (let i = 0; i < rollSumFrequency.length; i++) {
+          let newRow = sumFrequencyTable.insertRow();
+          let newCell = newRow.insertCell();
+          newCell.innerHTML = (i + parseInt(numDice));
+          newCell = newRow.insertCell();
+          newCell.innerHTML = rollSumFrequency[i];
+        }
+        //display the stats caluclated from array: stats
+        let newRow = statsTable.insertRow();
+        for (let i = 0; i < stats.length; i++) {
+          let newCell = newRow.insertCell();
+          newCell.innerHTML = stats[i];
+        }
+      }
+      function appendColumn(table, trElement, colName) {
+        let th = document.createElement('th');
+        trElement.appendChild(th);
+        th.innerHTML = colName;
+        th.id = colName;
+      }
+      function updateStatsArr() {
+        updateMergedArray();
+        
+        //calculates mean
+        stats.push(calculateMean());
+        //calculates median
+        stats.push(calculateMedian());
+        //calculate mode
+        stats.push(calculateMode());
+        //counts the num of doubles
+        if (numDice >= 2) {
+          stats.push(countNumDoubles());
+        }
+        //counts the num of triples
+        if (numDice == 3) {
+          stats.push(countNumTriples());
+        }
+      }
+      function calculateMode() {
+        //returns an array b/c you can have multiple modes
+        let mode = [];
+        let highestFrequency = 0;
+        for (let i = 0; i < mergedArray.length; i++) {
+          let currentElement = mergedArray[i];
+          let currentMode = currentElement;
+          let currentFrequency = 0;
+          while (currentElement == currentMode) {
+            currentFrequency++;
+            i++;
+            currentElement = mergedArray[i];
+          }
+          i--;
+          if (currentFrequency > highestFrequency) {
+            mode = [];
+            mode.push(currentMode);
+            highestFrequency = currentFrequency;
+          } else if (currentFrequency == highestFrequency) {
+            mode.push(currentMode);
+          }
+        }
+        return mode;
+      }
+      function calculateMedian() {
+        let median = 0;
+        //calculate median
+        let middleIndex = Math.floor(mergedArray.length / 2);
+        if (mergedArray.length % 2 == 1) {
+          median = mergedArray[middleIndex];
+        } else {
+          median = (mergedArray[middleIndex] + mergedArray[middleIndex - 1]) / 2;
+        }
+        return median;
+      }
+     
+      function calculateMean() {
+        let sum = 0;
+        for (let i = 0; i < numRolls; i++) {
+          sum += rollResultsDice1[i];
+          if (numDice >= 2) {
+            sum += rollResultsDice2[i];
+          } 
+          if (numDice == 3) {
+            sum += rollResultsDice3[i];
+          }
+        }
+        return Math.floor(sum / (numDice * numRolls) * 100 + 0.5) / 100;
+      }
+      function countNumTriples() {
+        let numTriples = 0;
+        for (let i = 0; i < numRolls; i++) {
+          if (rollResultsDice1[i] == rollResultsDice2[i] && rollResultsDice2 == rollResultsDice3) {
+            numTriples++;
+          }
+        }
+        return numTriples;
+      }
+      function countNumDoubles() {
+        let numDoubles = 0;
+        for (let i = 0; i < numRolls; i++) {
+          if (numDice == 2) {
+            if (rollResultsDice1[i] == rollResultsDice2[i]) {
+              numDoubles++;
+            }
+          } else if (numDice == 3) {
+            rollResultsDice1[i] == rollResultsDice2[i] || rollResultsDice1[i] == rollResultsDice3[i] || rollResultsDice2[i] == rollResultsDice3[i] ? numDoubles++ : 0;
+          }
+        }
+        return numDoubles;
+      }
+      function updateMergedArray() {
+        mergedArray = rollResultsDice1;
+        mergedArray = numDice == 2 ? mergedArray.concat(rollResultsDice2) : mergedArray.concat(rollResultsDice2).concat(rollResultsDice3);
+        mergedArray.sort((a, b) => a - b); //Rubric Requirement here
+      }
+      function updateRollSumFrequencyArr() {
+        let minSum = 1 * numDice;
+        let maxSum = 6 * numDice;
+        for (let i = minSum; i <= maxSum; i++) {
+          rollSumFrequency.push(findNumInArr(i, rollSum));
+        }
+      }
+      function findNumInArr(num, arr) {
+        let frequency = 0;
+        for (let i = 0; i < arr.length; i++) {
+          if (arr[i] == num) {
+            frequency++;
+          }
+        }
+        return frequency;
+      }
+      function updateRollSumArr() {
+        for (let i = 0; i < numRolls; i++) {
+          //sum of each roll
+          let sum = rollResultsDice1[i];
+          if (numDice >= 2) {
+            sum += rollResultsDice2[i];
+          }
+          if (numDice == 3) {
+            sum += rollResultsDice3[i];
+          }
+          rollSum.push(sum);
+        }
+      }
+      function generateOneRoll() {
+        let rollResultsArr = [];
+        for (let i = 0; i < numRolls; i++) {
+          rollResultsArr.push(getRandomInteger(1, 6));
+        }
+        return rollResultsArr;
+      }
+      function getRandomInteger(lower, upper) {
+        var multiplier = upper - (lower - 1);
+        var rnd = parseInt(Math.random() * multiplier) + lower;
+
+        return rnd;
+      }
+		</script>
+	</head>
+	<body onload = "initialize();">
+    <h1>Roll Roll Roll Your Dice</h1>
+    <div>
+      <form id = "inputform">
+        <label># of dice to roll</label>
+        <select name = "numDice">
+          <option value = "1">1</option>
+          <option value = "2">2</option>
+          <option value = "3">3</option>
+        </select>
+        
+        <br/>
+        <label># of rolls: </label>
+        <input name = "numRolls" placeholder = "Number of rolls..." type = "number"/>
+      </form>
+      <input onclick = "recordData();" type = "submit" value="Submit">
+    </div>
+
+
+    <br />
+    <h2>Current Dice Roll Stats</h3>
+    <div>
+      <p id = "numDice"># of dice to roll: 0</p>
+      <p id = "numRolls"># of dice rolls: 0</p>
+      <button onclick = "rollDice();">Roll Dice</button>
+    </div>
+
+    <br />
+    <h2>Roll Results</h2>
+    
+    <table id = "rollResultsTable">
+      <tr id = "rollResultsRow">
+        <th>Roll</th>
+        <th>Dice #1</th>
+      </tr>
+    </table>
+    <br/>
+    <h2>Sum Frequency Table</h2>
+    
+    <table id = "sumFrequencyTable">
+      <tr>
+        <th>Roll Sum</th>
+        <th>Frequency</th>
+      </tr>
+    </table>
+    <br/>
+    <h2>Stat Table</h2>
+    
+    <table id = "statsTable">
+      <tr id = "statsRow">
+        <th>Mean</th>
+        <th>Median</th>
+        <th>Mode</th>
+      </tr>
+    </table>
+	</body>
+</html>
