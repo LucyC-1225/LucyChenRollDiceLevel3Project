@@ -4,7 +4,6 @@
 		<title>Roll Roll Roll Your Dice Lucy Chen</title>
 		<style>
       body {
-        background-image: url("https://w0.peakpx.com/wallpaper/870/749/HD-wallpaper-math-blackboard-texture-background-with-geometric-shapes-math-background-math-texture-geometric-lines-shapes-texture-mathematics-background.jpg");
         background-image: url("https://p4.wallpaperbetter.com/wallpaper/782/869/293/abstraction-texture-colorful-abstract-wallpaper-preview.jpg");
         
         https://i.pinimg.com/736x/4d/c2/7b/4dc27b4dad3cdbfa38e3e698ee962796.jpg
@@ -155,13 +154,7 @@
         //simulate the rolls
         for (let i = 1; i <= numDice; i++) {
           //first Dice
-          if (i == 1) {
-            rollResultsDice1 = generateOneRoll();
-          } else if (i == 2) { //second Dice
-            rollResultsDice2 = generateOneRoll();
-          } else if (i == 3) { //third Dice
-            rollResultsDice3 = generateOneRoll();
-          }
+          i == 1 ? rollResultsDice1 = generateOneRoll() : i == 2 ? rollResultsDice2 = generateOneRoll() : rollResultsDice3 = generateOneRoll();
         }
         updateRollSumArr();
         updateRollSumFrequencyArr();
@@ -282,19 +275,14 @@
         let sum = 0;
         for (let i = 0; i < numRolls; i++) {
           sum += rollResultsDice1[i];
-          if (numDice >= 2) {
-            sum += rollResultsDice2[i];
-          } 
-          if (numDice == 3) {
-            sum += rollResultsDice3[i];
-          }
+          numDice == 2 ? sum += rollResultsDice2[i] : sum += rollResultsDice2[i] + rollResultsDice3[i];
         }
         return Math.floor(sum / (numDice * numRolls) * 100 + 0.5) / 100;
       }
       function countNumTriples() {
         let numTriples = 0;
         for (let i = 0; i < numRolls; i++) {
-          if (rollResultsDice1[i] == rollResultsDice2[i] && rollResultsDice2 == rollResultsDice3) {
+          if (rollResultsDice1[i] == rollResultsDice2[i] && rollResultsDice2[i] == rollResultsDice3[i]) {
             numTriples++;
           }
         }
